@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import numpy as np
 import pandas as pd
-from aiem.aerofoil_inflow_models import estimate_from_potential_flow
+from aiem.aerofoil_inflow_models import estimate_stagnation_from_potential_flow, estimate_speed_from_potential_flow
 
 
 class TestModel(TestCase):
@@ -19,12 +19,14 @@ class TestModel(TestCase):
         th = 0.18  # NACA 0018
         r_le = 1.1019 * th ** 2
 
-        # Transform x,y into curvilinear (eta)
+        # Transform x,y into mapped (eta)
         eta = np.sqrt(2 * np.real(dpressures_pos) / r_le) * np.sign(np.imag(dpressures_pos))  # using x formula
 
         mu_i = np.array([0, 300.44, -37.10, -1024.5, -1108.63])
 
-        eta_stagnation = estimate_from_potential_flow(mu_i, eta, 0)
+        eta_stagnation = estimate_stagnation_from_potential_flow(mu_i, eta, 0)
+
+        speed = estimate_speed_from_potential_flow(eta_stagnation, mu_i, eta, 0, 1.225)
 
         self.assertAlmostEqual(eta_stagnation, -0.553, delta=0.001)
 
@@ -49,7 +51,11 @@ class TestModel(TestCase):
              "p_sensor_4": [-1108.63, -1108.63, -1108.63, -1108.63]}
         )
 
-        measurements_df['eta_stagnation'] = measurements_df.apply(estimate_from_potential_flow, args=(eta, 0), axis=1)
+        measurements_df['eta_stagnation'] = measurements_df.apply(estimate_stagnation_from_potential_flow, args=(eta, 0), axis=1)
+        measurements_df['flow_speed'] = measurements_df.apply(lambda x: estimate_speed_from_potential_flow(
+            x['eta_stagnation'],
+            x[['p_sensor_0', 'p_sensor_1', 'p_sensor_2', 'p_sensor_3', 'p_sensor_4']],
+            eta, 0, 1.225), axis=1)
 
         self.assertIsNone(np.testing.assert_array_almost_equal(np.array([-0.553, -0.553, -0.553, -0.553]),
                                                              measurements_df['eta_stagnation'],
