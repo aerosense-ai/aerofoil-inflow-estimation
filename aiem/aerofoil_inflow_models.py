@@ -43,7 +43,7 @@ def estimate_stagnation_from_potential_flow(pressure, eta, apply_bounds=False):
 def estimate_speed_from_potential_flow(eta_stagnation, pressure, eta, rho):
     a = _potential_flow_function(eta_stagnation, eta)
     c = np.linalg.lstsq(np.atleast_2d(a).T, pressure, rcond=None)
-    flow_speed = np.sqrt(2*c[0]/rho)
+    flow_speed = np.sqrt(2*abs(c[0])/rho)
     return flow_speed[0]
 
 

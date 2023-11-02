@@ -6,7 +6,7 @@ from setuptools import setup  # , find_packages
 
 setup(
     name='aiem',
-    version='0.2.0',
+    version='0.2.1',
     description='Airfoil Inflow Estimation Models',
     author='Aerosense Team',
     author_email='julien.deparday@ost.ch',
