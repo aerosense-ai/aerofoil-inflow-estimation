@@ -12,8 +12,8 @@ class TestModel(TestCase):
         """Test that the algorythm produces expected result on a benchmark NACA 0018 case"""
 
         # Some data to test the script:
-        x_i = np.array([0.0376, 0.0065, 0.0, 0.0132, 0.0563])
-        y_i = np.array([-0.0471j, -0.0207j, 0.0j, 0.0291j, 0.0561j])
+        x_i = np.array([[0.0376, 0.0065, 0.0, 0.0132, 0.0563],[0.0376, 0.0376, 0.0376, 0.0376, 0.0376]])
+        y_i = np.array([[-0.0471j, -0.0207j, 0.0j, 0.0291j, 0.0561j],[-0.0471j, -0.0471j, -0.0471j, -0.0471j, -0.0471j]])
         dpressures_pos = x_i + y_i
 
         th = 0.18  # NACA 0018
@@ -24,17 +24,17 @@ class TestModel(TestCase):
 
         mu_i = np.array([0, 300.44, -37.10, -1024.5, -1108.63])
 
-        eta_stagnation = estimate_stagnation_from_potential_flow(mu_i, eta, 0)
+        eta_stagnation = estimate_stagnation_from_potential_flow(mu_i, eta, True)
 
-        speed = estimate_speed_from_potential_flow(eta_stagnation, mu_i, eta, 0, 1.225)
+        speed = estimate_speed_from_potential_flow(eta_stagnation, mu_i, eta, 1.225)
 
         self.assertAlmostEqual(eta_stagnation, -0.553, delta=0.001)
 
     def test_estimate_from_pf_with_pandas(self):
         """Test that estimate function can be passed as a pandas argument"""
         # Some data to test the script:
-        x_i = np.array([0.0376, 0.0065, 0.0, 0.0132, 0.0563])
-        y_i = np.array([-0.0471j, -0.0207j, 0.0j, 0.0291j, 0.0561j])
+        x_i = np.array([[0.0376, 0.0065, 0.0, 0.0132, 0.0563],[0.0376, 0.0376, 0.0376, 0.0376, 0.0376]])
+        y_i = np.array([[-0.0471j, -0.0207j, 0.0j, 0.0291j, 0.0561j],[-0.0471j, -0.0471j, -0.0471j, -0.0471j, -0.0471j]])
         dpressures_pos = x_i + y_i
 
         th = 0.18  # NACA 0018
@@ -51,11 +51,11 @@ class TestModel(TestCase):
              "p_sensor_4": [-1108.63, -1108.63, -1108.63, -1108.63]}
         )
 
-        measurements_df['eta_stagnation'] = measurements_df.apply(estimate_stagnation_from_potential_flow, args=(eta, 0), axis=1)
+        measurements_df['eta_stagnation'] = measurements_df.apply(estimate_stagnation_from_potential_flow, args=(eta, True), axis=1)
         measurements_df['flow_speed'] = measurements_df.apply(lambda x: estimate_speed_from_potential_flow(
             x['eta_stagnation'],
             x[['p_sensor_0', 'p_sensor_1', 'p_sensor_2', 'p_sensor_3', 'p_sensor_4']],
-            eta, 0, 1.225), axis=1)
+            eta,1.225), axis=1)
 
         self.assertIsNone(np.testing.assert_array_almost_equal(np.array([-0.553, -0.553, -0.553, -0.553]),
                                                              measurements_df['eta_stagnation'],
